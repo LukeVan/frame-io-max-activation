@@ -1,0 +1,11 @@
+# Status Monitor Configuration
+# Generated: Wed Sep  3 00:41:32 EDT 2025
+WORKSPACE_NAME="Unknown Workspace"
+WORKSPACE_ID="CoreX"
+PROJECT_NAME="Unknown Project"
+PROJECT_ID="Max Minis"
+FOLDER_ID="8f39eeec-d9b7-4aa7-ba05-687802267410"
+DOWNLOAD_FOLDER="/Users/lukevan/Desktop/Activation Setup/FrameIO_Downloads"
+STATUS_FIELD="Status"
+APPROVED_VALUES="Approved"
+CHECK_INTERVAL="60"
