@@ -124,22 +124,36 @@ get_folders() {
     
     echo ""
     echo -e "${CYAN}🏢 Available Workspaces:${NC}"
-    $CLI_COMMAND workspaces
     
-    echo ""
-    echo -e "${YELLOW}💡 Enter the workspace ID from the 'ID' column above${NC}"
-    read -p "Workspace ID: " workspace_id
-    
-    if [ -z "$workspace_id" ]; then
-        print_error "Workspace ID is required"
+    # Get workspace data and create numbered list
+    workspace_data=$($CLI_COMMAND workspaces --csv)
+    if [ $? -ne 0 ] || [ -z "$workspace_data" ]; then
+        print_error "Failed to get workspace list"
         exit 1
     fi
     
-    # Get workspace name for display
-    workspace_name=$($CLI_COMMAND workspaces --csv | grep ",$workspace_id," | cut -d',' -f1 | sed 's/^"//;s/"$//')
-    if [ -z "$workspace_name" ]; then
-        workspace_name="Unknown Workspace"
+    # Parse workspaces and display numbered list
+    echo "$workspace_data" | tail -n +2 | nl -w3 -s". " | sed 's/^[ ]*/  /'
+    
+    echo ""
+    workspace_count=$(echo "$workspace_data" | tail -n +2 | wc -l | tr -d ' ')
+    echo -e "${YELLOW}💡 Please select a workspace (1-$workspace_count):${NC}"
+    read -p "Enter workspace number: " workspace_choice
+    
+    if [ -z "$workspace_choice" ] || ! [[ "$workspace_choice" =~ ^[0-9]+$ ]]; then
+        print_error "Please enter a valid number"
+        exit 1
     fi
+    
+    if [ "$workspace_choice" -lt 1 ] || [ "$workspace_choice" -gt "$workspace_count" ]; then
+        print_error "Invalid selection. Please choose 1-$workspace_count"
+        exit 1
+    fi
+    
+    # Extract selected workspace ID
+    workspace_line=$(echo "$workspace_data" | tail -n +2 | sed -n "${workspace_choice}p")
+    workspace_id=$(echo "$workspace_line" | cut -d',' -f2 | sed 's/"//g')
+    workspace_name=$(echo "$workspace_line" | cut -d',' -f1 | sed 's/"//g')
     
     echo ""
     print_step "Setting workspace: $workspace_name ($workspace_id)"
@@ -147,22 +161,36 @@ get_folders() {
     
     echo ""
     echo -e "${CYAN}📂 Available Projects:${NC}"
-    $CLI_COMMAND projects
     
-    echo ""
-    echo -e "${YELLOW}💡 Enter the project ID from the parentheses above${NC}"
-    read -p "Project ID: " project_id
-    
-    if [ -z "$project_id" ]; then
-        print_error "Project ID is required"
+    # Get project data and create numbered list
+    project_data=$($CLI_COMMAND projects --csv)
+    if [ $? -ne 0 ] || [ -z "$project_data" ]; then
+        print_error "Failed to get project list"
         exit 1
     fi
     
-    # Get project name for display
-    project_name=$($CLI_COMMAND projects --csv | grep ",$project_id," | cut -d',' -f1 | sed 's/^"//;s/"$//')
-    if [ -z "$project_name" ]; then
-        project_name="Unknown Project"
+    # Parse projects and display numbered list
+    echo "$project_data" | tail -n +2 | nl -w3 -s". " | sed 's/^[ ]*/  /'
+    
+    echo ""
+    project_count=$(echo "$project_data" | tail -n +2 | wc -l | tr -d ' ')
+    echo -e "${YELLOW}💡 Please select a project (1-$project_count):${NC}"
+    read -p "Enter project number: " project_choice
+    
+    if [ -z "$project_choice" ] || ! [[ "$project_choice" =~ ^[0-9]+$ ]]; then
+        print_error "Please enter a valid number"
+        exit 1
     fi
+    
+    if [ "$project_choice" -lt 1 ] || [ "$project_choice" -gt "$project_count" ]; then
+        print_error "Invalid selection. Please choose 1-$project_count"
+        exit 1
+    fi
+    
+    # Extract selected project ID
+    project_line=$(echo "$project_data" | tail -n +2 | sed -n "${project_choice}p")
+    project_id=$(echo "$project_line" | cut -d',' -f2 | sed 's/"//g')
+    project_name=$(echo "$project_line" | cut -d',' -f1 | sed 's/"//g')
     
     echo ""
     print_step "Setting project: $project_name ($project_id)"
