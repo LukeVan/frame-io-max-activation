@@ -226,7 +226,7 @@ get_folders() {
     
     echo ""
     print_step "Setting project: $project_name ($project_id)"
-    $CLI_COMMAND projects "$project_id"
+    $CLI_COMMAND projects "$project_name"
     
     echo ""
     echo -e "${CYAN}📁 Available Folders:${NC}"
