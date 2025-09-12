@@ -226,7 +226,7 @@ def clean_frameio_folder(folder_id: str) -> bool:
                 if file_uuid:
                     try:
                         subprocess.run(
-                            [cli_cmd, 'delete', file_uuid],
+                            [cli_cmd, 'delete', '--force', file_uuid],
                             check=True,
                             capture_output=True
                         )

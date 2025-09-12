@@ -396,5 +396,31 @@ def show_rate_limit():
     current_limit = get_rate_limit()
     console.print(f"[blue]Current rate limit: {current_limit} requests per minute[/blue]")
 
+@cli.command()
+@click.argument('file_id')
+@click.option('--force', '-f', is_flag=True, help='Force deletion without confirmation prompt')
+@click.option('--account', help='Account ID to use (defaults to current account)')
+def delete(file_id, force, account):
+    """Delete a file by ID"""
+    # Monkey patch the delete_file function to handle force deletion
+    import click
+    from .commands.projects import delete_file
+    
+    if force:
+        # Temporarily override click.confirm to always return True
+        original_confirm = click.confirm
+        click.confirm = lambda *args, **kwargs: True
+        
+        try:
+            result = delete_file(file_id, account)
+        finally:
+            # Restore original confirm function
+            click.confirm = original_confirm
+    else:
+        result = delete_file(file_id, account)
+    
+    if not result:
+        raise click.ClickException("Failed to delete file")
+
 if __name__ == '__main__':
     cli() 
