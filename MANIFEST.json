@@ -1,6 +1,6 @@
 {
-  "package_name": "MAX_Activation_Interactive-20250911-2332",
-  "build_date": "2025-09-11T23:32:56.575318",
+  "package_name": "MAX_Activation_Interactive-20250911-2336",
+  "build_date": "2025-09-11T23:36:33.807969",
   "source_directory": "/Users/lukevan/Documents/GitHub/frame-io-v4-cli",
   "scripts": {
     "FrameIO-Tools/status_monitor.py": {
@@ -8,7 +8,7 @@
       "description": "No description"
     },
     "FrameIO-Tools/express_cleanup.py": {
-      "size": 10993,
+      "size": 11856,
       "description": "No description"
     },
     "FrameIO-Tools/simple_hotfolder.py": {

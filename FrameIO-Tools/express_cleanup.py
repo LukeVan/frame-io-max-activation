@@ -105,14 +105,37 @@ def clean_local_folder(folder_path: str, folder_name: str) -> bool:
         print_error(f"Failed to clean {folder_name}: {e}")
         return False
 
+def get_cli_command():
+    """Get the correct Frame.io CLI command path"""
+    # Try different possible locations
+    cli_commands = [
+        'fio',  # Global install
+        f'{os.path.expanduser("~/Library/Python/3.12/bin/fio")}',
+        f'{os.path.expanduser("~/Library/Python/3.11/bin/fio")}',
+        f'{os.path.expanduser("~/Library/Python/3.10/bin/fio")}',
+        f'{os.path.expanduser("~/Library/Python/3.9/bin/fio")}',
+    ]
+    
+    for cmd in cli_commands:
+        try:
+            result = subprocess.run([cmd, 'accounts'], capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                return cmd
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            continue
+    
+    return 'fio'  # Fallback to default
+
 def clean_frameio_folder(folder_id: str) -> bool:
     """Clean all files from a Frame.io folder using CLI"""
     try:
         print_info(f"Getting file list from Frame.io folder: {folder_id}")
         
+        cli_cmd = get_cli_command()
+        
         # Get list of files in the Frame.io folder
         result = subprocess.run(
-            ['python3', '-m', 'fio.cli', 'ls', folder_id, '--csv'],
+            [cli_cmd, 'ls', folder_id, '--csv'],
             capture_output=True,
             text=True,
             check=True
@@ -142,7 +165,7 @@ def clean_frameio_folder(folder_id: str) -> bool:
                     if file_type.lower() != 'folder':
                         try:
                             subprocess.run(
-                                ['python3', '-m', 'fio.cli', 'delete', file_id],
+                                [cli_cmd, 'delete', file_id],
                                 check=True,
                                 capture_output=True
                             )
@@ -159,6 +182,8 @@ def clean_frameio_folder(folder_id: str) -> bool:
         
     except subprocess.CalledProcessError as e:
         print_error(f"Failed to access Frame.io folder: {e}")
+        if e.stderr:
+            print_error(f"CLI error output: {e.stderr}")
         return False
     except Exception as e:
         print_error(f"Failed to clean Frame.io folder: {e}")
