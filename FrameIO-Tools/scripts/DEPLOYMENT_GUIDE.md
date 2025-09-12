@@ -117,7 +117,6 @@ MacBook/Desktop/
 └── Activation Setup/                # ← Main folder for all Frame.io tools
     ├── 🔥 Start Hot Folder.command      # ← Double-click to upload files
     ├── 📊 Start Status Monitor.command  # ← Double-click to download approved files
-    ├── 🔧 Setup Frame.io Tools.command  # ← Re-run setup if needed
     ├── FrameIO_Upload_HotFolder/         # ← Drop files here to upload
     └── FrameIO_Downloads/               # ← Approved files download here
 

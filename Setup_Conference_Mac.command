@@ -289,9 +289,6 @@ create_shortcuts() {
         print_success "Created: 📊 Start Status Monitor.command"
     fi
     
-    # Create setup shortcut
-    ln -sf "$(pwd)/scripts/Setup_Conference_Mac.command" "$activation_folder/🔧 Setup Frame.io Tools.command"
-    print_success "Created: 🔧 Setup Frame.io Tools.command"
 }
 
 # Create default folders
@@ -351,7 +348,7 @@ main() {
     echo "  export PATH=\"\$HOME/Library/Python/3.9/bin:\$PATH\""
     echo "  (or replace 3.9 with your Python version)"
     echo ""
-    print_warning "If you need to re-run this setup, use '🔧 Setup Frame.io Tools' in Activation Setup"
+    print_warning "If you need to re-run this setup, just download and run Setup_Conference_Mac.command again"
     echo ""
     
     read -p "Press Enter to exit..."
