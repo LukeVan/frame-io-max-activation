@@ -124,21 +124,37 @@ get_folders() {
     
     echo ""
     echo -e "${CYAN}🏢 Available Workspaces:${NC}"
+    $CLI_COMMAND workspaces
     
-    # Get workspace data and create numbered list
+    # Get workspace data for selection
     workspace_data=$($CLI_COMMAND workspaces --csv)
     if [ $? -ne 0 ] || [ -z "$workspace_data" ]; then
         print_error "Failed to get workspace list"
         exit 1
     fi
     
-    # Parse workspaces and display numbered list
-    echo "$workspace_data" | tail -n +2 | nl -w3 -s". " | sed 's/^[ ]*/  /'
+    echo ""
+    echo -e "${YELLOW}💡 Select a workspace:${NC}"
+    
+    # Parse workspaces and display clean numbered list (names only)
+    workspace_names=()
+    workspace_ids=()
+    while IFS=',' read -r name id created updated; do
+        # Remove quotes from name and id
+        name=$(echo "$name" | sed 's/^"//;s/"$//')
+        id=$(echo "$id" | sed 's/^"//;s/"$//')
+        workspace_names+=("$name")
+        workspace_ids+=("$id")
+    done < <(echo "$workspace_data" | tail -n +2)
+    
+    # Display clean numbered list
+    for i in "${!workspace_names[@]}"; do
+        echo "$((i+1))) ${workspace_names[$i]}"
+    done
     
     echo ""
-    workspace_count=$(echo "$workspace_data" | tail -n +2 | wc -l | tr -d ' ')
-    echo -e "${YELLOW}💡 Please select a workspace (1-$workspace_count):${NC}"
-    read -p "Enter workspace number: " workspace_choice
+    workspace_count=${#workspace_names[@]}
+    read -p "Enter workspace number (1-$workspace_count): " workspace_choice
     
     if [ -z "$workspace_choice" ] || ! [[ "$workspace_choice" =~ ^[0-9]+$ ]]; then
         print_error "Please enter a valid number"
@@ -150,32 +166,48 @@ get_folders() {
         exit 1
     fi
     
-    # Extract selected workspace ID
-    workspace_line=$(echo "$workspace_data" | tail -n +2 | sed -n "${workspace_choice}p")
-    workspace_id=$(echo "$workspace_line" | cut -d',' -f2 | sed 's/"//g')
-    workspace_name=$(echo "$workspace_line" | cut -d',' -f1 | sed 's/"//g')
+    # Get selected workspace info from arrays
+    workspace_index=$((workspace_choice - 1))
+    workspace_name="${workspace_names[$workspace_index]}"
+    workspace_id="${workspace_ids[$workspace_index]}"
     
     echo ""
     print_step "Setting workspace: $workspace_name ($workspace_id)"
-    $CLI_COMMAND workspaces "$workspace_id"
+    $CLI_COMMAND workspaces set "$workspace_name"
     
     echo ""
     echo -e "${CYAN}📂 Available Projects:${NC}"
+    $CLI_COMMAND projects
     
-    # Get project data and create numbered list
+    # Get project data for selection
     project_data=$($CLI_COMMAND projects --csv)
     if [ $? -ne 0 ] || [ -z "$project_data" ]; then
         print_error "Failed to get project list"
         exit 1
     fi
     
-    # Parse projects and display numbered list
-    echo "$project_data" | tail -n +2 | nl -w3 -s". " | sed 's/^[ ]*/  /'
+    echo ""
+    echo -e "${YELLOW}💡 Select a project:${NC}"
+    
+    # Parse projects and display clean numbered list (names only)
+    project_names=()
+    project_ids=()
+    while IFS=',' read -r name id created updated; do
+        # Remove quotes from name and id
+        name=$(echo "$name" | sed 's/^"//;s/"$//')
+        id=$(echo "$id" | sed 's/^"//;s/"$//')
+        project_names+=("$name")
+        project_ids+=("$id")
+    done < <(echo "$project_data" | tail -n +2)
+    
+    # Display clean numbered list
+    for i in "${!project_names[@]}"; do
+        echo "$((i+1))) ${project_names[$i]}"
+    done
     
     echo ""
-    project_count=$(echo "$project_data" | tail -n +2 | wc -l | tr -d ' ')
-    echo -e "${YELLOW}💡 Please select a project (1-$project_count):${NC}"
-    read -p "Enter project number: " project_choice
+    project_count=${#project_names[@]}
+    read -p "Enter project number (1-$project_count): " project_choice
     
     if [ -z "$project_choice" ] || ! [[ "$project_choice" =~ ^[0-9]+$ ]]; then
         print_error "Please enter a valid number"
@@ -187,10 +219,10 @@ get_folders() {
         exit 1
     fi
     
-    # Extract selected project ID
-    project_line=$(echo "$project_data" | tail -n +2 | sed -n "${project_choice}p")
-    project_id=$(echo "$project_line" | cut -d',' -f2 | sed 's/"//g')
-    project_name=$(echo "$project_line" | cut -d',' -f1 | sed 's/"//g')
+    # Get selected project info from arrays
+    project_index=$((project_choice - 1))
+    project_name="${project_names[$project_index]}"
+    project_id="${project_ids[$project_index]}"
     
     echo ""
     print_step "Setting project: $project_name ($project_id)"
