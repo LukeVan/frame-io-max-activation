@@ -134,46 +134,90 @@ get_monitor_folder() {
     fi
     
     echo ""
-    echo -e "${YELLOW}💡 Enter the workspace ID from the 'ID' column above${NC}"
-    read -p "Workspace ID: " workspace_id
+    echo -e "${YELLOW}💡 Select a workspace:${NC}"
     
-    if [ -z "$workspace_id" ]; then
-        print_error "Workspace ID is required"
+    # Get workspace data for selection
+    workspace_csv=$($CLI_COMMAND workspaces --csv 2>/dev/null | tail -n +2)
+    if [ -z "$workspace_csv" ]; then
+        print_error "No workspaces found"
         exit 1
     fi
     
-    # Get workspace name for display
-    workspace_name=$($CLI_COMMAND workspaces --csv | grep ",$workspace_id," | cut -d',' -f1 | sed 's/^"//;s/"$//')
-    if [ -z "$workspace_name" ]; then
-        workspace_name="Unknown Workspace"
+    # Create numbered menu
+    workspace_count=0
+    declare -a workspace_ids
+    declare -a workspace_names
+    
+    while IFS=',' read -r name id created updated; do
+        workspace_count=$((workspace_count + 1))
+        workspace_ids[$workspace_count]=$(echo "$id" | sed 's/^"//;s/"$//')
+        workspace_names[$workspace_count]=$(echo "$name" | sed 's/^"//;s/"$//')
+        echo "  $workspace_count) ${workspace_names[$workspace_count]}"
+    done <<< "$workspace_csv"
+    
+    echo ""
+    read -p "Enter workspace number (1-$workspace_count): " workspace_choice
+    
+    if [[ ! "$workspace_choice" =~ ^[0-9]+$ ]] || [ "$workspace_choice" -lt 1 ] || [ "$workspace_choice" -gt "$workspace_count" ]; then
+        print_error "Invalid selection"
+        exit 1
     fi
+    
+    workspace_id="${workspace_ids[$workspace_choice]}"
+    workspace_name="${workspace_names[$workspace_choice]}"
     
     echo ""
     print_step "Setting workspace: $workspace_name ($workspace_id)"
-    $CLI_COMMAND workspaces "$workspace_id"
+    $CLI_COMMAND workspaces "$workspace_name"
     
     echo ""
     echo -e "${CYAN}📂 Available Projects:${NC}"
     $CLI_COMMAND projects
     
     echo ""
-    echo -e "${YELLOW}💡 Enter the project ID from the parentheses above${NC}"
-    read -p "Project ID: " project_id
+    echo -e "${YELLOW}💡 Select a project:${NC}"
     
-    if [ -z "$project_id" ]; then
-        print_error "Project ID is required"
+    # Get project data for selection
+    project_csv=$($CLI_COMMAND projects --csv 2>/dev/null | tail -n +2)
+    if [ -z "$project_csv" ]; then
+        print_error "No projects found"
         exit 1
     fi
     
-    # Get project name for display
-    project_name=$($CLI_COMMAND projects --csv | grep ",$project_id," | cut -d',' -f1 | sed 's/^"//;s/"$//')
-    if [ -z "$project_name" ]; then
-        project_name="Unknown Project"
+    # Create numbered menu
+    project_count=0
+    declare -a project_ids
+    declare -a project_names
+    
+    while IFS=',' read -r name created updated url; do
+        project_count=$((project_count + 1))
+        # Extract project ID from the name field (it's in parentheses)
+        if [[ "$name" =~ \(([0-9a-f-]+)\) ]]; then
+            project_ids[$project_count]="${BASH_REMATCH[1]}"
+            project_names[$project_count]=$(echo "$name" | sed 's/ *([^)]*)$//' | sed 's/^"//;s/"$//')
+        else
+            # Fallback - use name as is
+            project_ids[$project_count]=$(echo "$name" | sed 's/^"//;s/"$//')
+            project_names[$project_count]=$(echo "$name" | sed 's/^"//;s/"$//')
+        fi
+        echo "  $project_count) ${project_names[$project_count]}"
+    done <<< "$project_csv"
+    
+    echo ""
+    read -p "Enter project number (1-$project_count): " project_choice
+    
+    if [[ ! "$project_choice" =~ ^[0-9]+$ ]] || [ "$project_choice" -lt 1 ] || [ "$project_choice" -gt "$project_count" ]; then
+        print_error "Invalid selection"
+        exit 1
     fi
+    
+    project_id="${project_ids[$project_choice]}"
+    project_name="${project_names[$project_choice]}"
     
     echo ""
     print_step "Setting project: $project_name ($project_id)"
-    $CLI_COMMAND projects "$project_id"
+    # Use the project name to set the default, not the ID
+    $CLI_COMMAND projects "$project_name"
     
     echo ""
     echo -e "${CYAN}📁 Available Folders:${NC}"
