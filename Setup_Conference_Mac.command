@@ -289,6 +289,11 @@ create_shortcuts() {
         print_success "Created: 📊 Start Status Monitor.command"
     fi
     
+    if [ -f "scripts/Launch_Express_Cleanup.command" ]; then
+        ln -sf "$(pwd)/scripts/Launch_Express_Cleanup.command" "$activation_folder/🚀 Express Cleanup.command"
+        print_success "Created: 🚀 Express Cleanup.command"
+    fi
+    
 }
 
 # Create default folders
@@ -305,7 +310,7 @@ create_folders() {
     print_success "Created default folders in Activation Setup"
     print_info "  📂 FrameIO_Upload_HotFolder - Drop files here to upload"
     print_info "  📥 FrameIO_Downloads - Approved files download here"
-    print_info "  🚀 Express-Download - Express download folder"
+    print_info "  🚀 Express-Download - Drop PNG/MP4 here to trigger kiosk reset"
 }
 
 # Main setup function
@@ -334,11 +339,12 @@ main() {
     echo "  1. 📁 Open 'Activation Setup' folder on Desktop"
     echo "  2. 🔥 Double-click '🔥 Start Hot Folder' to upload files"
     echo "  3. 📊 Double-click '📊 Start Status Monitor' to download approved files"
+    echo "  4. 🚀 Double-click '🚀 Express Cleanup' to reset kiosk (drop PNG/MP4 triggers)"
     echo ""
     print_info "Your folders are ready:"
     echo "  📂 FrameIO_Upload_HotFolder - Drop files here to upload"
     echo "  📥 FrameIO_Downloads - Approved files download here"
-    echo "  🚀 Express-Download - Express download folder"
+    echo "  🚀 Express-Download - Drop PNG/MP4 here to trigger kiosk reset"
     echo ""
     print_warning "macOS Security Note:"
     echo "  • First-time scripts may require approval in System Preferences > Privacy & Security"
