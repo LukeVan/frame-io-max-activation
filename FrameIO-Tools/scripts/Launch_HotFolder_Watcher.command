@@ -173,7 +173,7 @@ get_folders() {
     
     echo ""
     print_step "Setting workspace: $workspace_name ($workspace_id)"
-    $CLI_COMMAND workspaces set "$workspace_name"
+    $CLI_COMMAND workspaces "$workspace_name"
     
     echo ""
     echo -e "${CYAN}📂 Available Projects:${NC}"
