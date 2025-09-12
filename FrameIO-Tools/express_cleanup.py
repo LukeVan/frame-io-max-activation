@@ -134,9 +134,46 @@ def clean_frameio_folder(folder_id: str) -> bool:
         
         cli_cmd = get_cli_command()
         
-        # Get list of files in the Frame.io folder
+        # Load configurations to get workspace and project info
+        hotfolder_config = load_config_file(Path("hotfolder_config.txt"))
+        if not hotfolder_config:
+            print_error("No hotfolder configuration found - cannot determine workspace/project")
+            return False
+        
+        workspace_name = hotfolder_config.get('WORKSPACE_NAME')
+        project_name = hotfolder_config.get('PROJECT_NAME')
+        
+        if not workspace_name or not project_name:
+            print_error("Missing workspace or project name in configuration")
+            return False
+        
+        # Set Frame.io CLI context
+        print_info(f"Setting workspace: {workspace_name}")
+        try:
+            subprocess.run([cli_cmd, 'workspaces', workspace_name], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
+            print_error(f"Failed to set workspace: {e}")
+            return False
+        
+        print_info(f"Setting project: {project_name}")
+        try:
+            subprocess.run([cli_cmd, 'projects', project_name], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
+            print_error(f"Failed to set project: {e}")
+            return False
+        
+        # Navigate to the specific folder
+        print_info(f"Navigating to folder: {folder_id}")
+        try:
+            subprocess.run([cli_cmd, 'cd', folder_id], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
+            print_error(f"Failed to navigate to folder: {e}")
+            return False
+        
+        # Get list of files in the current folder
+        print_info("Getting file list from current folder...")
         result = subprocess.run(
-            [cli_cmd, 'ls', folder_id],
+            [cli_cmd, 'ls'],
             capture_output=True,
             text=True,
             check=True
@@ -208,8 +245,10 @@ def clean_frameio_folder(folder_id: str) -> bool:
         
     except subprocess.CalledProcessError as e:
         print_error(f"Failed to access Frame.io folder: {e}")
-        if e.stderr:
+        if hasattr(e, 'stderr') and e.stderr:
             print_error(f"CLI error output: {e.stderr}")
+        if hasattr(e, 'stdout') and e.stdout:
+            print_error(f"CLI stdout: {e.stdout}")
         return False
     except Exception as e:
         print_error(f"Failed to clean Frame.io folder: {e}")
