@@ -134,99 +134,46 @@ get_folders() {
     fi
     
     echo ""
-    echo -e "${YELLOW}💡 Select a workspace:${NC}"
+    echo -e "${YELLOW}💡 Enter the workspace ID from the 'ID' column above${NC}"
+    read -p "Workspace ID: " workspace_id
     
-    # Parse workspaces and display clean numbered list (names only)
-    workspace_names=()
-    workspace_ids=()
-    while IFS=',' read -r name id created updated; do
-        # Remove quotes from name and id
-        name=$(echo "$name" | sed 's/^"//;s/"$//')
-        id=$(echo "$id" | sed 's/^"//;s/"$//')
-        workspace_names+=("$name")
-        workspace_ids+=("$id")
-    done < <(echo "$workspace_data" | tail -n +2)
-    
-    # Display clean numbered list
-    for i in "${!workspace_names[@]}"; do
-        echo "$((i+1))) ${workspace_names[$i]}"
-    done
-    
-    echo ""
-    workspace_count=${#workspace_names[@]}
-    read -p "Enter workspace number (1-$workspace_count): " workspace_choice
-    
-    if [ -z "$workspace_choice" ] || ! [[ "$workspace_choice" =~ ^[0-9]+$ ]]; then
-        print_error "Please enter a valid number"
+    if [ -z "$workspace_id" ]; then
+        print_error "Workspace ID is required"
         exit 1
     fi
     
-    if [ "$workspace_choice" -lt 1 ] || [ "$workspace_choice" -gt "$workspace_count" ]; then
-        print_error "Invalid selection. Please choose 1-$workspace_count"
-        exit 1
+    # Get workspace name for display
+    workspace_name=$($CLI_COMMAND workspaces --csv | grep ",$workspace_id," | cut -d',' -f1 | sed 's/^"//;s/"$//')
+    if [ -z "$workspace_name" ]; then
+        workspace_name="Unknown Workspace"
     fi
-    
-    # Get selected workspace info from arrays
-    workspace_index=$((workspace_choice - 1))
-    workspace_name="${workspace_names[$workspace_index]}"
-    workspace_id="${workspace_ids[$workspace_index]}"
     
     echo ""
     print_step "Setting workspace: $workspace_name ($workspace_id)"
-    $CLI_COMMAND workspaces "$workspace_name"
+    $CLI_COMMAND workspaces "$workspace_id"
     
     echo ""
     echo -e "${CYAN}📂 Available Projects:${NC}"
     $CLI_COMMAND projects
     
-    # Get project data for selection
-    project_data=$($CLI_COMMAND projects --csv)
-    if [ $? -ne 0 ] || [ -z "$project_data" ]; then
-        print_error "Failed to get project list"
-        exit 1
-    fi
-    
     echo ""
-    echo -e "${YELLOW}💡 Select a project:${NC}"
+    echo -e "${YELLOW}💡 Enter the project ID from the parentheses above${NC}"
+    read -p "Project ID: " project_id
     
-    # Parse projects and display clean numbered list (names only)
-    project_names=()
-    project_ids=()
-    while IFS=',' read -r name id created updated; do
-        # Remove quotes from name and id
-        name=$(echo "$name" | sed 's/^"//;s/"$//')
-        id=$(echo "$id" | sed 's/^"//;s/"$//')
-        project_names+=("$name")
-        project_ids+=("$id")
-    done < <(echo "$project_data" | tail -n +2)
-    
-    # Display clean numbered list
-    for i in "${!project_names[@]}"; do
-        echo "$((i+1))) ${project_names[$i]}"
-    done
-    
-    echo ""
-    project_count=${#project_names[@]}
-    read -p "Enter project number (1-$project_count): " project_choice
-    
-    if [ -z "$project_choice" ] || ! [[ "$project_choice" =~ ^[0-9]+$ ]]; then
-        print_error "Please enter a valid number"
+    if [ -z "$project_id" ]; then
+        print_error "Project ID is required"
         exit 1
     fi
     
-    if [ "$project_choice" -lt 1 ] || [ "$project_choice" -gt "$project_count" ]; then
-        print_error "Invalid selection. Please choose 1-$project_count"
-        exit 1
+    # Get project name for display
+    project_name=$($CLI_COMMAND projects --csv | grep ",$project_id," | cut -d',' -f1 | sed 's/^"//;s/"$//')
+    if [ -z "$project_name" ]; then
+        project_name="Unknown Project"
     fi
-    
-    # Get selected project info from arrays
-    project_index=$((project_choice - 1))
-    project_name="${project_names[$project_index]}"
-    project_id="${project_ids[$project_index]}"
     
     echo ""
     print_step "Setting project: $project_name ($project_id)"
-    $CLI_COMMAND projects "$project_name"
+    $CLI_COMMAND projects "$project_id"
     
     echo ""
     echo -e "${CYAN}📁 Available Folders:${NC}"
