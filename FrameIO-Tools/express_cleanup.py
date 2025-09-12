@@ -12,6 +12,7 @@ import time
 import shutil
 import subprocess
 import argparse
+import re
 from pathlib import Path
 from typing import Set, Dict, Any
 import threading
@@ -135,7 +136,7 @@ def clean_frameio_folder(folder_id: str) -> bool:
         
         # Get list of files in the Frame.io folder
         result = subprocess.run(
-            [cli_cmd, 'ls', folder_id, '--csv'],
+            [cli_cmd, 'ls', folder_id],
             capture_output=True,
             text=True,
             check=True
@@ -145,34 +146,59 @@ def clean_frameio_folder(folder_id: str) -> bool:
             print_info("Frame.io folder is already empty")
             return True
         
-        # Parse CSV output to get file IDs (skip header)
+        # Parse regular ls output to get file IDs
         lines = result.stdout.strip().split('\n')
-        if len(lines) <= 1:  # Only header or empty
+        if len(lines) == 0:
             print_info("Frame.io folder is already empty")
             return True
         
         file_count = 0
-        for line in lines[1:]:  # Skip header
-            if line.strip():
-                # CSV format: name,id,type,created_at,updated_at
-                parts = line.split(',')
-                if len(parts) >= 2:
-                    file_name = parts[0].strip('"')
-                    file_id = parts[1].strip('"')
-                    file_type = parts[2].strip('"') if len(parts) > 2 else "unknown"
-                    
-                    # Skip folders, only delete files
-                    if file_type.lower() != 'folder':
-                        try:
-                            subprocess.run(
-                                [cli_cmd, 'delete', file_id],
-                                check=True,
-                                capture_output=True
-                            )
-                            print_info(f"Deleted from Frame.io: {file_name}")
-                            file_count += 1
-                        except subprocess.CalledProcessError as e:
-                            print_error(f"Failed to delete {file_name} from Frame.io: {e}")
+        # Process lines to find files (not folders)
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            
+            # Skip empty lines
+            if not line:
+                i += 1
+                continue
+                
+            # Check if this line contains a file (not a folder emoji 📁)
+            if line and not line.startswith('📁'):
+                # Look for UUID in this line or the next line
+                file_uuid = None
+                file_name = line
+                
+                # Try to extract UUID from current line
+                uuid_pattern = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+                uuid_match = re.search(uuid_pattern, line)
+                
+                if uuid_match:
+                    file_uuid = uuid_match.group()
+                    # Remove UUID from filename for cleaner display
+                    file_name = re.sub(r'\s*\([^)]*' + file_uuid + r'[^)]*\)', '', line).strip()
+                elif i + 1 < len(lines):
+                    # Check next line for UUID
+                    next_line = lines[i + 1].strip()
+                    uuid_match = re.search(uuid_pattern, next_line)
+                    if uuid_match:
+                        file_uuid = uuid_match.group()
+                        i += 1  # Skip the next line since we processed it
+                
+                # If we found a file UUID, delete it
+                if file_uuid:
+                    try:
+                        subprocess.run(
+                            [cli_cmd, 'delete', file_uuid],
+                            check=True,
+                            capture_output=True
+                        )
+                        print_info(f"Deleted from Frame.io: {file_name}")
+                        file_count += 1
+                    except subprocess.CalledProcessError as e:
+                        print_error(f"Failed to delete {file_name} from Frame.io: {e}")
+            
+            i += 1
         
         if file_count > 0:
             print_success(f"Cleaned {file_count} files from Frame.io folder")
