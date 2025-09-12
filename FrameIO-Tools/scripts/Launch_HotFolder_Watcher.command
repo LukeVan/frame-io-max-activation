@@ -224,12 +224,67 @@ get_folders() {
     $CLI_COMMAND ls
     
     echo ""
-    read -p "Enter Target Folder ID (copy from parentheses above): " folder_id
+    echo -e "${YELLOW}💡 Select a target folder for uploads:${NC}"
     
-    if [ -z "$folder_id" ]; then
-        print_error "Folder ID is required"
+    # Get folder data by parsing ls output
+    # The ls command shows folders with emoji and ID in parentheses
+    folder_output=$($CLI_COMMAND ls 2>/dev/null)
+    if [ -z "$folder_output" ]; then
+        print_error "No folders found or failed to list folders"
         exit 1
     fi
+    
+    # Parse folder output to extract folder info
+    folder_count=0
+    declare -a folder_ids
+    declare -a folder_names
+    
+    # Look for lines with folder emoji and extract name and ID
+    # The CLI output has folder name on one line and ID on the next line
+    folder_lines=()
+    while IFS= read -r line; do
+        folder_lines+=("$line")
+    done <<< "$folder_output"
+    
+    # Process lines in pairs (folder name line + ID line)
+    for ((i=0; i<${#folder_lines[@]}; i++)); do
+        line="${folder_lines[i]}"
+        # Check if line contains folder emoji
+        if [[ "$line" == *"📁"* ]]; then
+            # Get the next line which should contain the ID
+            if [[ $((i+1)) -lt ${#folder_lines[@]} ]]; then
+                next_line="${folder_lines[$((i+1))]}"
+                # Extract UUID from the next line using grep
+                folder_uuid=$(echo "$next_line" | grep -o '[0-9a-f]\{8\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{12\}')
+                if [ -n "$folder_uuid" ]; then
+                    folder_count=$((folder_count + 1))
+                    # Extract folder name from the emoji line
+                    folder_name_raw=$(echo "$line" | cut -d'│' -f2 | sed 's/📁[[:space:]]*//' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+                    folder_names[$folder_count]="$folder_name_raw"
+                    folder_ids[$folder_count]="$folder_uuid"
+                    echo "  $folder_count) ${folder_names[$folder_count]}"
+                fi
+            fi
+        fi
+    done
+    
+    if [ "$folder_count" -eq 0 ]; then
+        print_error "No folders found for upload target"
+        exit 1
+    fi
+    
+    echo ""
+    read -p "Enter folder number (1-$folder_count): " folder_choice
+    
+    if [[ ! "$folder_choice" =~ ^[0-9]+$ ]] || [ "$folder_choice" -lt 1 ] || [ "$folder_choice" -gt "$folder_count" ]; then
+        print_error "Invalid selection"
+        exit 1
+    fi
+    
+    folder_id="${folder_ids[$folder_choice]}"
+    folder_name="${folder_names[$folder_choice]}"
+    
+    print_success "Selected target folder: $folder_name ($folder_id)"
     
     # Validate that folder_id looks like a UUID, not a name
     if [[ ! "$folder_id" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
