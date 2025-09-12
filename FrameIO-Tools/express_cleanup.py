@@ -3,6 +3,7 @@
 Express-Download Cleanup Script
 Monitors Express-Download folder for PNG/MP4 trigger files
 When detected, cleans up local folders and Frame.io files for kiosk reset
+Note: Trigger files are preserved in Express-Download folder for manual handling
 """
 
 import os
@@ -192,8 +193,7 @@ def perform_cleanup(express_folder: Path) -> bool:
     else:
         print_warning("No Frame.io folder ID found in config files")
     
-    # Clean Express-Download folder (remove trigger files)
-    success &= clean_local_folder(str(express_folder), "Express-Download")
+    # Note: Express-Download folder is NOT cleaned - trigger files are preserved for manual handling
     
     if success:
         print_success("🎉 KIOSK RESET COMPLETE - Ready for next user!")
@@ -253,6 +253,8 @@ when PNG or MP4 files are added. The cleanup includes:
 - Local FrameIO_Upload_HotFolder
 - Local FrameIO_Downloads  
 - Files from the configured Frame.io project folder
+
+Note: PNG/MP4 trigger files are preserved in Express-Download for manual handling
         """
     )
     
