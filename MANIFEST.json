@@ -1,8 +1,16 @@
 {
-  "package_name": "MAX_Activation_Interactive-20250911-2137",
-  "build_date": "2025-09-11T21:37:51.771058",
+  "package_name": "MAX_Activation_Interactive-20250911-2310",
+  "build_date": "2025-09-11T23:10:41.837066",
   "source_directory": "/Users/lukevan/Documents/GitHub/frame-io-v4-cli",
   "scripts": {
+    "FrameIO-Tools/status_monitor.py": {
+      "size": 14499,
+      "description": "No description"
+    },
+    "FrameIO-Tools/express_cleanup.py": {
+      "size": 10862,
+      "description": "No description"
+    },
     "FrameIO-Tools/simple_hotfolder.py": {
       "size": 14806,
       "description": "No description"
@@ -53,10 +61,6 @@
     },
     "FrameIO-Tools/scripts/automation/FTP2hotfolder_watcher.py": {
       "size": 13170,
-      "description": "No description"
-    },
-    "FrameIO-Tools/scripts/automation/status_monitor.py": {
-      "size": 14499,
       "description": "No description"
     },
     "FrameIO-Tools/scripts/automation/hotfolder_watcher.py": {

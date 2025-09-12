@@ -124,9 +124,8 @@ get_monitor_folder() {
     
     echo ""
     echo -e "${CYAN}🏢 Available Workspaces:${NC}"
-    $CLI_COMMAND workspaces
     
-    # Get workspace data for selection
+    # Get workspace data and create numbered list
     workspace_data=$($CLI_COMMAND workspaces --csv)
     if [ $? -ne 0 ] || [ -z "$workspace_data" ]; then
         print_error "Failed to get workspace list"
@@ -172,6 +171,7 @@ get_monitor_folder() {
     
     echo ""
     echo -e "${CYAN}📂 Available Projects:${NC}"
+    
     $CLI_COMMAND projects
     
     echo ""
