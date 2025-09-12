@@ -305,12 +305,12 @@ create_folders() {
     
     mkdir -p "$activation_folder/FrameIO_Upload_HotFolder"
     mkdir -p "$activation_folder/FrameIO_Downloads"
-    mkdir -p "$activation_folder/Express-Download"
+    mkdir -p "$activation_folder/Boards_Express_Downloads"
     
     print_success "Created default folders in Activation Setup"
     print_info "  📂 FrameIO_Upload_HotFolder - Drop files here to upload"
     print_info "  📥 FrameIO_Downloads - Approved files download here"
-    print_info "  🚀 Express-Download - Drop PNG/MP4 here to trigger kiosk reset"
+    print_info "  🚀 Boards_Express_Downloads - Drop PNG/MP4 here to trigger kiosk reset"
 }
 
 # Main setup function
@@ -344,7 +344,7 @@ main() {
     print_info "Your folders are ready:"
     echo "  📂 FrameIO_Upload_HotFolder - Drop files here to upload"
     echo "  📥 FrameIO_Downloads - Approved files download here"
-    echo "  🚀 Express-Download - Drop PNG/MP4 here to trigger kiosk reset"
+    echo "  🚀 Boards_Express_Downloads - Drop PNG/MP4 here to trigger kiosk reset"
     echo ""
     print_warning "macOS Security Note:"
     echo "  • First-time scripts may require approval in System Preferences > Privacy & Security"

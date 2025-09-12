@@ -72,15 +72,15 @@ fi
 
 if [[ "$config_found" == "false" ]]; then
     print_warning "No configuration files found"
-    print_info "The cleanup will only clear the Express-Download folder"
+    print_info "The cleanup will only clear the Boards_Express_Downloads folder"
     echo ""
 fi
 
-# Set default Express-Download folder path
-default_express_folder="$HOME/Desktop/Activation Setup/Express-Download"
+# Set default Boards_Express_Downloads folder path
+default_express_folder="$HOME/Desktop/Activation Setup/Boards_Express_Downloads"
 
 echo ""
-print_step "Express-Download folder setup:"
+print_step "Boards_Express_Downloads folder setup:"
 print_info "Default: $default_express_folder"
 echo ""
 read -p "Press Enter to use default, or type custom path: " custom_path
@@ -94,28 +94,28 @@ fi
 # Expand tilde and resolve path
 express_folder="${express_folder/#~/$HOME}"
 
-print_step "Validating Express-Download folder: $express_folder"
+print_step "Validating Boards_Express_Downloads folder: $express_folder"
 
 # Create folder if it doesn't exist
 if [[ ! -d "$express_folder" ]]; then
-    print_warning "Express-Download folder doesn't exist"
+    print_warning "Boards_Express_Downloads folder doesn't exist"
     read -p "Create it? (y/n): " create_folder
     if [[ "$create_folder" =~ ^[Yy]$ ]]; then
         mkdir -p "$express_folder"
         if [[ $? -eq 0 ]]; then
-            print_success "Created Express-Download folder"
+            print_success "Created Boards_Express_Downloads folder"
         else
-            print_error "Failed to create Express-Download folder"
+            print_error "Failed to create Boards_Express_Downloads folder"
         fi
     else
-        print_error "Express-Download folder is required"
+        print_error "Boards_Express_Downloads folder is required"
     fi
 else
-    print_success "Express-Download folder found"
+    print_success "Boards_Express_Downloads folder found"
 fi
 
 echo ""
-print_step "Starting Express-Download Cleanup Monitor..."
+print_step "Starting Boards Express Downloads Cleanup Monitor..."
 print_info "📁 Monitoring: $express_folder"
 print_info "🎯 Trigger: Drop PNG or MP4 files to reset kiosk"
 echo ""
@@ -127,6 +127,6 @@ echo ""
 python3 express_cleanup.py "$express_folder"
 
 echo ""
-print_success "Express-Download cleanup monitor stopped"
+print_success "Boards Express Downloads cleanup monitor stopped"
 echo ""
 read -p "Press Enter to close this window..."

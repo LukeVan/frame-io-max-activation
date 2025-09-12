@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Express-Download Cleanup Script
-Monitors Express-Download folder for PNG/MP4 trigger files (except untitled.mp4)
+Boards Express Downloads Cleanup Script
+Monitors Boards_Express_Downloads folder for PNG/MP4 trigger files (except untitled.mp4)
 When detected, cleans up local folders and Frame.io files for kiosk reset
-Note: Trigger files are preserved in Express-Download folder for manual handling
+Note: Trigger files are preserved in Boards_Express_Downloads folder for manual handling
 """
 
 import os
@@ -283,7 +283,7 @@ def perform_cleanup(express_folder: Path) -> bool:
     else:
         print_warning("No Frame.io folder ID found in config files")
     
-    # Note: Express-Download folder is NOT cleaned - trigger files are preserved for manual handling
+    # Note: Boards_Express_Downloads folder is NOT cleaned - trigger files are preserved for manual handling
     
     if success:
         print_success("🎉 KIOSK RESET COMPLETE - Ready for next user!")
@@ -293,7 +293,7 @@ def perform_cleanup(express_folder: Path) -> bool:
     return success
 
 class ExpressCleanupHandler(FileSystemEventHandler):
-    """Handles file system events in Express-Download folder"""
+    """Handles file system events in Boards_Express_Downloads folder"""
     
     def __init__(self, express_folder: Path):
         self.express_folder = express_folder
@@ -336,26 +336,26 @@ class ExpressCleanupHandler(FileSystemEventHandler):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Express-Download Cleanup Monitor",
+        description="Boards Express Downloads Cleanup Monitor",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python3 express_cleanup.py /path/to/Express-Download
-  python3 express_cleanup.py "$HOME/Desktop/Activation Setup/Express-Download"
+  python3 express_cleanup.py /path/to/Boards_Express_Downloads
+  python3 express_cleanup.py "$HOME/Desktop/Activation Setup/Boards_Express_Downloads"
 
-This script monitors the Express-Download folder and triggers a full cleanup
+This script monitors the Boards_Express_Downloads folder and triggers a full cleanup
 when PNG or MP4 files are added (except untitled.mp4). The cleanup includes:
 - Local FrameIO_Upload_HotFolder
 - Local FrameIO_Downloads  
 - Files from the configured Frame.io project folder
 
-Note: PNG/MP4 trigger files are preserved in Express-Download for manual handling
+Note: PNG/MP4 trigger files are preserved in Boards_Express_Downloads for manual handling
         """
     )
     
     parser.add_argument(
         'express_folder',
-        help='Path to the Express-Download folder to monitor'
+        help='Path to the Boards_Express_Downloads folder to monitor'
     )
     
     parser.add_argument(
@@ -373,13 +373,13 @@ Note: PNG/MP4 trigger files are preserved in Express-Download for manual handlin
     # Change to config directory so config files can be found
     os.chdir(config_dir)
     
-    print_status("🚀 EXPRESS-DOWNLOAD CLEANUP MONITOR", Colors.BOLD + Colors.HEADER)
+    print_status("🚀 BOARDS EXPRESS DOWNLOADS CLEANUP MONITOR", Colors.BOLD + Colors.HEADER)
     print_info(f"Monitor folder: {express_folder}")
     print_info(f"Config directory: {config_dir}")
     
     # Validate express folder
     if not express_folder.exists():
-        print_error(f"Express-Download folder doesn't exist: {express_folder}")
+        print_error(f"Boards_Express_Downloads folder doesn't exist: {express_folder}")
         sys.exit(1)
     
     # Check if config files exist
@@ -387,7 +387,7 @@ Note: PNG/MP4 trigger files are preserved in Express-Download for manual handlin
     status_config_path = config_dir / "status_monitor_config.txt"
     
     if not hotfolder_config_path.exists() and not status_config_path.exists():
-        print_warning("No config files found - cleanup will be limited to Express-Download folder")
+        print_warning("No config files found - cleanup will be limited to Boards_Express_Downloads folder")
     
     print_success("Monitor started - drop PNG or MP4 files to trigger cleanup")
     print_info("Press Ctrl+C to stop")
@@ -402,11 +402,11 @@ Note: PNG/MP4 trigger files are preserved in Express-Download for manual handlin
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print_status("🛑 Stopping Express-Download monitor...", Colors.YELLOW)
+        print_status("🛑 Stopping Boards Express Downloads monitor...", Colors.YELLOW)
         observer.stop()
     
     observer.join()
-    print_success("Express-Download monitor stopped")
+    print_success("Boards Express Downloads monitor stopped")
 
 if __name__ == "__main__":
     main()
