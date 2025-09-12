@@ -1,11 +1,11 @@
 # Status Monitor Configuration
-# Generated: Wed Sep  3 00:41:32 EDT 2025
-WORKSPACE_NAME="Unknown Workspace"
-WORKSPACE_ID="CoreX"
-PROJECT_NAME="Unknown Project"
+# Default configuration for MAX deployment package
+WORKSPACE_NAME="CoreX"
+WORKSPACE_ID="8a6419a4-f384-487e-8dc2-4c77c1d5286b"
+PROJECT_NAME="Max Minis"
 PROJECT_ID="Max Minis"
-FOLDER_ID="8f39eeec-d9b7-4aa7-ba05-687802267410"
+FOLDER_ID="fff07bc6-7903-47f2-a5ff-469a708aad69"
 DOWNLOAD_FOLDER="/Users/lukevan/Desktop/Activation Setup/FrameIO_Downloads"
 STATUS_FIELD="Status"
 APPROVED_VALUES="Approved"
-CHECK_INTERVAL="60"
+CHECK_INTERVAL="10"

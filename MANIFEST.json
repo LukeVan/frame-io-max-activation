@@ -1,6 +1,6 @@
 {
-  "package_name": "MAX_Activation_Interactive-20250911-2348",
-  "build_date": "2025-09-11T23:48:07.576642",
+  "package_name": "MAX_Activation_Interactive-20250912-0022",
+  "build_date": "2025-09-12T00:22:49.330227",
   "source_directory": "/Users/lukevan/Documents/GitHub/frame-io-v4-cli",
   "scripts": {
     "FrameIO-Tools/status_monitor.py": {
