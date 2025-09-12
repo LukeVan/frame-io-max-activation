@@ -423,7 +423,7 @@ start_monitor() {
     
     # Build the command arguments (from project root)
     cmd_args=(
-        "python3" "scripts/automation/status_monitor.py"
+        "python3" "status_monitor.py"
         "$folder_id" 
         "$download_folder"
         "--status-fields" "$status_field"

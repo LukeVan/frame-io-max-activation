@@ -384,7 +384,7 @@ start_watcher() {
     print_success "🚀 Starting Hot Folder Watcher!"
     echo ""
     
-    python3 scripts/automation/simple_hotfolder.py "$watch_folder" "$folder_id"
+    python3 simple_hotfolder.py "$watch_folder" "$folder_id"
 }
 
 # Function to load existing config
