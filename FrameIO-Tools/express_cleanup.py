@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Boards Express Downloads Cleanup Script
-Monitors Boards_Express_Downloads folder for PNG/MP4 trigger files (except untitled.mp4)
+Monitors Boards_Express_Downloads folder for PNG/MP4 trigger files (except untitled files)
 When detected, cleans up local folders and Frame.io files for kiosk reset
 Note: Trigger files are preserved in Boards_Express_Downloads folder for manual handling
 """
@@ -309,7 +309,7 @@ class ExpressCleanupHandler(FileSystemEventHandler):
             self._check_trigger_file(event.dest_path)
     
     def _check_trigger_file(self, file_path: str):
-        """Check if the file is a trigger file (PNG/MP4, but not untitled.mp4)"""
+        """Check if the file is a trigger file (PNG/MP4, but not untitled files)"""
         if self.processing:
             return
         
@@ -317,9 +317,9 @@ class ExpressCleanupHandler(FileSystemEventHandler):
         
         # Check if it's a PNG or MP4 file
         if file_path.suffix.lower() in ['.png', '.mp4']:
-            # Skip untitled.mp4 files (common default name that shouldn't trigger cleanup)
-            if file_path.name.lower() == 'untitled.mp4':
-                print_status(f"⏭️ Skipping trigger file: {file_path.name} (untitled.mp4 files are ignored)")
+            # Skip common untitled files (shouldn't trigger cleanup)
+            if file_path.name.lower() in ['untitled.mp4', 'untitled.png']:
+                print_status(f"⏭️ Skipping trigger file: {file_path.name} (untitled files are ignored)")
                 return
                 
             print_status(f"🎯 Trigger file detected: {file_path.name}")
@@ -344,7 +344,7 @@ Examples:
   python3 express_cleanup.py "$HOME/Desktop/Activation Setup/Boards_Express_Downloads"
 
 This script monitors the Boards_Express_Downloads folder and triggers a full cleanup
-when PNG or MP4 files are added (except untitled.mp4). The cleanup includes:
+when PNG or MP4 files are added (except untitled files). The cleanup includes:
 - Local FrameIO_Upload_HotFolder
 - Local FrameIO_Downloads  
 - Files from the configured Frame.io project folder
