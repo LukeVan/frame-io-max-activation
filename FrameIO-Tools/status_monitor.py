@@ -38,10 +38,11 @@ class FileStatus:
 
 class StatusMonitor:
     def __init__(self, folder_id: str, download_path: str, approved_values: List[str], 
-                 check_interval: int = 300, download_enabled: bool = True):
+                 status_fields: List[str] = None, check_interval: int = 300, download_enabled: bool = True):
         self.folder_id = folder_id
         self.download_path = Path(download_path)
         self.approved_values = [v.lower() for v in approved_values]  # Case insensitive
+        self.status_fields = [f.lower() for f in (status_fields or ['status'])]  # Default to 'status'
         self.check_interval = check_interval
         self.download_enabled = download_enabled
         
@@ -162,9 +163,9 @@ class StatusMonitor:
             field_type = field.get('field_type', '')
             value = field.get('value')
             
-            # Look for "approval" or "status" field (case insensitive)
-            if 'approval' in field_name or 'status' in field_name:
-                print(f"🔍 Found approval field: '{field.get('field_definition_name')}' = {value}")
+            # Look for specified status fields (case insensitive)
+            if any(status_field in field_name for status_field in self.status_fields):
+                print(f"🔍 Found status field: '{field.get('field_definition_name')}' = {value}")
                 
                 if field_type in ['select', 'select_multi'] and value:
                     if isinstance(value, list) and value:
@@ -283,6 +284,7 @@ class StatusMonitor:
         print(f"\n📊 Status Summary:")
         print(f"   Monitored folder: {self.folder_id}")
         print(f"   Download path: {self.download_path}")
+        print(f"   Status fields: {', '.join(self.status_fields)}")
         print(f"   Approved values: {', '.join(self.approved_values)}")
         print(f"   Files downloaded: {len(self.downloaded_files)}")
         print(f"   Files tracked: {len(self.tracked_files)}")
@@ -329,6 +331,9 @@ def main():
     parser = argparse.ArgumentParser(description='Monitor Frame.io Status field for approved files')
     parser.add_argument('folder_id', help='Frame.io folder ID to monitor')
     parser.add_argument('download_path', help='Local path to download approved files')
+    parser.add_argument('--status-fields', nargs='+',
+                       default=['Status'],
+                       help='Metadata field names to monitor for status (case insensitive, default: Status)')
     parser.add_argument('--approved-values', nargs='+',
                        default=['approved', 'final', 'ready', 'complete'],
                        help='Status values that indicate approval (case insensitive)')
@@ -350,6 +355,7 @@ def main():
         folder_id=args.folder_id,
         download_path=args.download_path,
         approved_values=args.approved_values,
+        status_fields=args.status_fields,
         check_interval=args.interval,
         download_enabled=not args.no_download
     )
