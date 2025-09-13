@@ -69,6 +69,12 @@ def should_ignore_file(file_path: str) -> bool:
         return True
     if file_name.startswith('.tmp'):  # Temp files
         return True
+    if file_name.startswith('.dat.nosync'):  # Sync service temp files
+        return True
+    if file_name.startswith('.syncthing'):  # Syncthing temp files
+        return True
+    if file_name.endswith('.synctmp'):  # More sync temp files
+        return True
         
     # Check file extensions that should be ignored
     ignored_extensions = [
@@ -95,13 +101,24 @@ class SimpleHotFolderHandler(FileSystemEventHandler):
         """Handle file creation events"""
         if event.is_directory:
             return
-            
-        file_path = event.src_path
-        
+        self._handle_new_file(event.src_path, "created")
+    
+    def on_moved(self, event):
+        """Handle file move/rename events (like temp file -> final name)"""
+        if event.is_directory:
+            return
+        # Process the destination file (the final renamed file)
+        self._handle_new_file(event.dest_path, "moved")
+    
+    def _handle_new_file(self, file_path: str, event_type: str):
+        """Common handler for new files (created or moved)"""
         # Check if this file should be ignored
         if should_ignore_file(file_path):
-            print(f"⏭️  Ignoring system/temp file: {Path(file_path).name}")
+            print(f"⏭️  Ignoring system/temp file: {Path(file_path).name} ({event_type})")
             return
+        
+        # If not ignored, show that we're going to process it
+        print(f"📸 Processing file: {Path(file_path).name} ({event_type})")
         
         print(f"🔍 New file detected: {file_path}")
         
@@ -140,8 +157,10 @@ class SimpleHotFolderHandler(FileSystemEventHandler):
             
             # Verify file still exists and is accessible
             if not os.path.exists(file_path):
-                print(f"⚠️  File disappeared: {file_path}")
+                print(f"⚠️  File disappeared during stability check: {Path(file_path).name}")
                 return
+            
+            print(f"✅ File is stable: {Path(file_path).name} ({os.path.getsize(file_path):,} bytes)")
                 
             try:
                 # Calculate file hash for duplicate detection
